@@ -1,5 +1,10 @@
-import { benchmarkCreateFunc } from './benchmark-create-func.js'
-import { benchmarkClassNew } from './benchmark-class-new.js'
+import { BenchmarkResultFormatter } from './BenchmarkResultFormatter.js'
+
+function invariant(condition, message) {
+    if (!condition) {
+        throw new Error(message)
+    }
+}
 
 function parseArg(argKeys) {
     if (!Array.isArray(argKeys)) {
@@ -15,17 +20,21 @@ function parseArg(argKeys) {
 }
 
 
-const iterations = parseInt(parseArg('--iterations'))
-const formatArg = parseArg('--format')
-const benchmarkArg = parseArg('--benchmark')
+const samples = parseInt(parseArg('--samples'), 10)
+const iterations = parseInt(parseArg('--iterations'), 10)
 
-const benchmarkFuncs = {
-    'class-new': benchmarkClassNew,
-    'create-func': benchmarkCreateFunc,
-}
+const format = parseArg('--format')
+invariant(['text', 'csv', 'json'].includes(format), '--format must be one of text, csv, json')
 
-const benchmark = benchmarkFuncs[benchmarkArg]
+const operation = parseArg('--operation')
+invariant(/^[a-zA-Z0-9-]+$/.test(operation), '--operation must be provided and must be a valid operation name')
 
-const result = benchmark.run(iterations)
-console.log(result[formatArg]())
+const { default: operationFunc } = await import(`./operations/${operation}.js`)
+
+let timeTaken = performance.now()
+operationFunc(iterations)
+timeTaken = performance.now() - timeTaken
+
+const result = new BenchmarkResultFormatter(iterations, timeTaken)
+console.log(result[format]())
 

@@ -1,5 +1,3 @@
-import { Benchmark } from './benchmark.js'
-
 class A {
     constructor(a) {
         this.a = a;
@@ -22,9 +20,9 @@ class A {
 }
 
 
-export const benchmarkClassNew = new Benchmark(function (n) {
+export default function (n) {
     for (let i = 0; i < n; i++) {
         new A(i).f1();
     }
-}) 
+}
 

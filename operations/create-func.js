@@ -1,5 +1,3 @@
-import { Benchmark } from './benchmark.js'
-
 function create(a) {
     return {
         f1: function() {
@@ -20,9 +18,9 @@ function create(a) {
     }
 } 
 
-export const benchmarkCreateFunc = new Benchmark(function (n) {
+export default function (n) {
     for (let i = 0; i < n; i++) {
         create(i).f1()
     }
-}) 
+}
 
