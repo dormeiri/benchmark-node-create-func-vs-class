@@ -1,4 +1,4 @@
-import { endBenchmark, startBenchmark } from './benchmark.js'
+import { Benchmark } from './benchmark.js'
 
 class A {
     constructor(a) {
@@ -21,8 +21,10 @@ class A {
     }
 }
 
-const benchmark = startBenchmark()
-for (let i = 0; i < benchmark.iterations; i++) {
-    new A(i).f1()
-}
-endBenchmark(benchmark)
+
+export const benchmarkClassNew = new Benchmark(function (n) {
+    for (let i = 0; i < n; i++) {
+        new A(i).f1();
+    }
+}) 
+

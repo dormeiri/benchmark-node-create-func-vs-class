@@ -1,35 +1,37 @@
 export class Benchmark {
-    constructor(iterations) {
-        this.iterations = iterations
-        this.startTime = 0
-        this.result = null
+    #fn
+
+    constructor(fn) {
+        this.#fn = fn
     }
 
-    start() {
-        this.startTime = performance.now()
-    }
-
-    end() {
-        const endTime = performance.now() - this.startTime
-        this.result = {
-            iterations: this.iterations,
-            timeTaken: roundToPrecision(endTime, 3),
-            iterationsPerSecond: Math.round(this.iterations / (endTime / 1000))
-        }
+    run(iterations) {
+        let timeTaken = performance.now()
+        this.#fn(iterations)
+        timeTaken = performance.now() - timeTaken
+        return new BenchmarkResult(iterations, timeTaken)
     }
 }
 
-export const formatBenchmarkResultFuncs = {
-    text(result) {
-        return `Iterations: ${result.iterations}
-Time taken: ${result.timeTaken}ms
-Iterations per second: ${result.iterationsPerSecond}`
-    },
-    csv(result) { 
-        return `${result.iterations},${result.timeTaken},${result.iterationsPerSecond}`
-    },
-    json(result) {
-        return JSON.stringify(result)
+export class BenchmarkResult {
+    constructor(iterations, timeTaken) {
+        this.iterations = iterations
+        this.timeTaken = timeTaken
+        this.iterationsPerSecond = Math.round(this.iterations / (timeTaken / 1000))
+    }
+
+    text() {
+        return `Iterations: ${this.iterations}
+Time taken: ${roundToPrecision(this.timeTaken, 3)}ms
+Iterations per second: ${this.iterationsPerSecond}`
+    }
+
+    csv() { 
+        return [this.iterations, this.timeTaken, this.iterationsPerSecond].join(',')
+    }
+
+    json() {
+        return JSON.stringify({ iterations: this.iterations, timeTaken: this.timeTaken, iterationsPerSecond: this.iterationsPerSecond })
     }
 }
 
@@ -37,27 +39,3 @@ function roundToPrecision(number, precision) {
     return Math.round((number + Number.EPSILON) * Math.pow(10, precision)) / Math.pow(10, precision)
 }
 
-export function parseArg(argKeys) {
-    if (!Array.isArray(argKeys)) {
-        argKeys = [argKeys]
-    }
-    for (const arg of process.argv) {
-        for (const argKey of argKeys) {
-            if (arg.startsWith(argKey + '=')) {
-                return arg.slice(argKey.length + 1)
-            }
-        }
-    }
-}
-
-export function startBenchmark() {
-    const benchmark = new Benchmark(parseArg('--iterations') ?? 1000)
-    benchmark.start()
-    return benchmark
-}
-
-export function endBenchmark(benchmark) {
-    benchmark.end()
-    const formatBenchmarkResult = formatBenchmarkResultFuncs[parseArg('--format') ?? 'text']
-    console.log(formatBenchmarkResult(benchmark.result))
-}

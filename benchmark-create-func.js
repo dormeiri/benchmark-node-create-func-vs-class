@@ -1,4 +1,4 @@
-import { endBenchmark, startBenchmark } from './benchmark.js'
+import { Benchmark } from './benchmark.js'
 
 function create(a) {
     return {
@@ -20,8 +20,9 @@ function create(a) {
     }
 } 
 
-const benchmark = startBenchmark()
-for (let i = 0; i < benchmark.iterations; i++) {
-    create(i).f1()
-}
-endBenchmark(benchmark)
+export const benchmarkCreateFunc = new Benchmark(function (n) {
+    for (let i = 0; i < n; i++) {
+        create(i).f1()
+    }
+}) 
+
