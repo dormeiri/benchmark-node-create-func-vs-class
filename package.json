@@ -3,5 +3,8 @@
     "version": "0.0.0",
     "main": "index.js",
     "type": "module",
-    "author": "Dor Meiri"
+    "author": "Dor Meiri",
+    "devDependencies": {
+        "nodemark": "^0.3.0"
+    }
 }
